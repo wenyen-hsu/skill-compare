@@ -13,6 +13,7 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="zh_TW">
+<meta property="og:locale:alternate" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="同一句話，兩個 skill：anatomy vs machine">
 <meta name="twitter:description" content="令牌桶限流器、單缸四行程引擎，兩個 Claude Code skill 的成果並排比較。">
@@ -22,8 +23,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <script>
-  // Round 2 prompt（頁面上所有 data-prompt="round2" 的地方都會跟著換）
-  const ROUND2_PROMPT = '單缸四行程引擎怎麼運作';
+  // Language: ?lang=en|zh, then the saved choice, then the browser. Set before paint so nothing flashes.
+  (() => {
+    let lang = new URLSearchParams(location.search).get('lang');
+    if (lang !== 'en' && lang !== 'zh') { try { lang = localStorage.getItem('skill-compare-lang'); } catch (e) {} }
+    if (lang !== 'en' && lang !== 'zh') lang = /^zh/i.test(navigator.language || '') ? 'zh' : 'en';
+    document.documentElement.lang = lang === 'zh' ? 'zh-Hant-TW' : 'en';
+    document.documentElement.dataset.lang = lang;
+  })();
 </script>
 <style>
   :root {
@@ -165,6 +172,14 @@
     table.cmp td.a::before { color: var(--anatomy); } table.cmp td.m::before { color: var(--machine); }
   }
 
+  html[data-lang="zh"] [data-l="en"], html[data-lang="en"] [data-l="zh"] { display: none !important; }
+  .lang-switch { position: absolute; top: 20px; right: 16px; display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; background: var(--surface); }
+  @media (min-width: 720px) { .lang-switch { right: 40px; top: 28px; } }
+  .lang-switch button { font: inherit; font-size: 13px; font-weight: 500; border: 0; background: transparent; color: var(--ink-2); padding: 6px 14px; cursor: pointer; line-height: 1.4; }
+  .lang-switch button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .lang-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  header.hero { position: relative; }
+  .round-prompt .tr { display: block; font-family: "Noto Sans TC", sans-serif; font-size: 12px; color: var(--ink-3); }
   .verdict { margin-top: 28px; color: var(--ink-2); max-width: 46em; }
 
   footer { border-top: 1px solid var(--rule); padding: 32px 0 56px; font-size: 14px; color: var(--ink-3); }
@@ -176,17 +191,25 @@
 <body>
 
 <header class="hero wrap">
-  <div class="eyebrow">Claude Code skill 對照</div>
-  <h1>同一句話，兩個 skill</h1>
+  <div class="lang-switch" role="group" aria-label="Language / 語言">
+    <button type="button" data-set-lang="zh" lang="zh-Hant-TW">中文</button>
+    <button type="button" data-set-lang="en" lang="en">EN</button>
+  </div>
+  <div class="eyebrow"><span data-l="zh">Claude Code skill 對照</span><span data-l="en">Claude Code skills, side by side</span></div>
+  <h1><span data-l="zh">同一句話，兩個 skill</span><span data-l="en">One prompt, two skills</span></h1>
   <p>
-    我們把<strong>一模一樣的一句提示</strong>分別交給兩個會「畫東西來解釋事情」的 Claude Code skill：
+    <span data-l="zh">我們把<strong>一模一樣的一句提示</strong>分別交給兩個會「畫東西來解釋事情」的 Claude Code skill：
     走手繪感等角線稿路線的 <strong>anatomy</strong>，以及走寫實 three.js 3D 模擬路線的 <strong>machine</strong>。
     兩邊都沒有人工修圖，影片就是它們自己產出的動畫。第一回合考抽象演算法，第二回合考真正的機械，
-    看看各自在主場與客場的表現。
+    看看各自在主場與客場的表現。</span>
+    <span data-l="en">We gave <strong>the exact same one-line prompt</strong> to two Claude Code skills that explain things by drawing them:
+    <strong>anatomy</strong>, which makes crafted isometric line drawings, and <strong>machine</strong>, which builds photoreal three.js 3D simulations.
+    Nothing was retouched by hand; every video is the animation the skill produced on its own. Round 1 is an abstract algorithm,
+    round 2 is a real machine, so each skill plays one game at home and one away.</span>
   </p>
   <div class="legend">
-    <span><span class="dot a"></span>anatomy — 等角 SVG 線稿</span>
-    <span><span class="dot m"></span>machine — 寫實 three.js 3D</span>
+    <span><span class="dot a"></span>anatomy — <span data-l="zh">等角 SVG 線稿</span><span data-l="en">isometric SVG line art</span></span>
+    <span><span class="dot m"></span>machine — <span data-l="zh">寫實 three.js 3D</span><span data-l="en">photoreal three.js 3D</span></span>
   </div>
 </header>
 
@@ -196,14 +219,14 @@
     <div class="wrap">
       <div class="round-head">
         <div>
-          <div class="round-no">第一回合 · anatomy 的主場</div>
-          <h2>令牌桶限流器</h2>
-          <p class="sub">這是一個抽象演算法，沒有實體外觀可以參考。誰能把它變成一台「看得懂」的機器？</p>
-          <div class="round-prompt">解釋 token bucket rate limiter 怎麼運作</div>
+          <div class="round-no"><span data-l="zh">第一回合 · anatomy 的主場</span><span data-l="en">Round 1 · anatomy's home turf</span></div>
+          <h2><span data-l="zh">令牌桶限流器</span><span data-l="en">Token bucket rate limiter</span></h2>
+          <p class="sub"><span data-l="zh">這是一個抽象演算法，沒有實體外觀可以參考。誰能把它變成一台「看得懂」的機器？</span><span data-l="en">An abstract algorithm with nothing physical to look at. Who can turn it into a machine you understand at a glance?</span></p>
+          <div class="round-prompt">解釋 token bucket rate limiter 怎麼運作<span class="tr" data-l="en">“Explain how a token bucket rate limiter works” (prompt as typed)</span></div>
         </div>
         <div class="controls">
-          <button class="btn primary" data-action="toggle" aria-pressed="false">同步播放</button>
-          <button class="btn" data-action="replay">重播</button>
+          <button class="btn primary" data-action="toggle" aria-pressed="false"><span data-l="zh">同步播放</span><span data-l="en">Play both</span></button>
+          <button class="btn" data-action="replay"><span data-l="zh">重播</span><span data-l="en">Replay</span></button>
         </div>
       </div>
 
@@ -211,16 +234,16 @@
         <figure class="anatomy" style="--w: 1.19">
           <div class="stage" style="--ar: 858 / 720">
             <video src="media/token-bucket-anatomy.mp4" muted loop playsinline controls preload="metadata"></video>
-            <div class="placeholder"><div class="spinner"></div>影片產生中…<small>media/token-bucket-anatomy.mp4</small></div>
+            <div class="placeholder"><div class="spinner"></div><span data-l="zh">影片產生中…</span><span data-l="en">Video rendering…</span><small>media/token-bucket-anatomy.mp4</small></div>
           </div>
           <figcaption>
-            <div class="label"><h3>anatomy</h3><span class="kind">等角 SVG · 292 KB 單檔 HTML</span></div>
-            <div class="notes-title">看點</div>
+            <div class="label"><h3>anatomy</h3><span class="kind"><span data-l="zh">等角 SVG · 292 KB 單檔 HTML</span><span data-l="en">isometric SVG · 292 KB single HTML file</span></span></div>
+            <div class="notes-title"><span data-l="zh">看點</span><span data-l="en">What to watch</span></div>
             <ul class="notes">
-              <li>把令牌桶做成一台<strong>投幣式發幣機</strong>：進料輪每秒補 1 枚令牌，彈匣最多裝 8 枚。</li>
-              <li>每來一個請求，滑塊就推出一枚令牌放行；彈匣空了，<strong>拒絕旗</strong>立刻升起。</li>
-              <li>彈匣滿了還在補？多出來的令牌掉進旁邊的<strong>溢出接盤</strong>，「容量上限」一眼就懂。</li>
-              <li>角落的即時讀數「x / 8 令牌 · 通過 · 拒絕」跟著動畫同步跳動。</li>
+              <li><span data-l="zh">把令牌桶做成一台<strong>投幣式發幣機</strong>：進料輪每秒補 1 枚令牌，彈匣最多裝 8 枚。</span><span data-l="en">The bucket becomes a <strong>coin dispenser</strong>: a feed wheel adds 1 token per second to a magazine that holds 8.</span></li>
+              <li><span data-l="zh">每來一個請求，滑塊就推出一枚令牌放行；彈匣空了，<strong>拒絕旗</strong>立刻升起。</span><span data-l="en">Each request strokes a slide that pushes one token out; when the magazine is empty a <strong>refusal flag</strong> pops up.</span></li>
+              <li><span data-l="zh">彈匣滿了還在補？多出來的令牌掉進旁邊的<strong>溢出接盤</strong>，「容量上限」一眼就懂。</span><span data-l="en">Still refilling when full? The extra token bounces into a <strong>spill tray</strong>, so the capacity cap is obvious.</span></li>
+              <li><span data-l="zh">角落的即時讀數「x / 8 令牌 · 通過 · 拒絕」跟著動畫同步跳動。</span><span data-l="en">The corner readout (tokens / 8 · passed · refused) updates in step with the motion.</span></li>
             </ul>
           </figcaption>
         </figure>
@@ -228,16 +251,16 @@
         <figure class="machine" style="--w: 1.778">
           <div class="stage" style="--ar: 16 / 9">
             <video src="media/token-bucket-machine.mp4" muted loop playsinline controls preload="metadata"></video>
-            <div class="placeholder"><div class="spinner"></div>影片產生中…<small>media/token-bucket-machine.mp4</small></div>
+            <div class="placeholder"><div class="spinner"></div><span data-l="zh">影片產生中…</span><span data-l="en">Video rendering…</span><small>media/token-bucket-machine.mp4</small></div>
           </div>
           <figcaption>
-            <div class="label"><h3>machine</h3><span class="kind">three.js 寫實 3D · 自錄 28 秒影片</span></div>
-            <div class="notes-title">看點</div>
+            <div class="label"><h3>machine</h3><span class="kind"><span data-l="zh">three.js 寫實 3D · 自錄 28 秒影片</span><span data-l="en">photoreal three.js 3D · self-recorded 28 s film</span></span></div>
+            <div class="notes-title"><span data-l="zh">看點</span><span data-l="en">What to watch</span></div>
             <ul class="notes">
-              <li>同一台發幣機，用黃銅與鋁的 PBR 材質重建，真實尺寸約 34 cm，像擺在桌上的實物。</li>
-              <li>主數字直接顯示「桶裡還有幾枚令牌」，旁邊有請求速率滑桿可以調。</li>
-              <li>「Flood it」破壞模式：每秒灌 40 個請求，畫面上仍然每秒只放行 1 個。</li>
-              <li>自動影片依序演出：組裝 → 運轉 → 剖面 → 爆炸圖 → 灌爆。</li>
+              <li><span data-l="zh">同一台發幣機，用黃銅與鋁的 PBR 材質重建，真實尺寸約 34 cm，像擺在桌上的實物。</span><span data-l="en">The same dispenser rebuilt in PBR brass and aluminium at a real desk size of about 34 cm.</span></li>
+              <li><span data-l="zh">主數字直接顯示「桶裡還有幾枚令牌」，旁邊有請求速率滑桿可以調。</span><span data-l="en">The hero number is the tokens left in the bucket, with a slider for the request rate.</span></li>
+              <li><span data-l="zh">「Flood it」破壞模式：每秒灌 40 個請求，畫面上仍然每秒只放行 1 個。</span><span data-l="en">“Flood it” mode fires 40 requests per second, and still only 1 gets through each second.</span></li>
+              <li><span data-l="zh">自動影片依序演出：組裝 → 運轉 → 剖面 → 爆炸圖 → 灌爆。</span><span data-l="en">The auto film runs: assemble → run → cutaway → exploded view → flood.</span></li>
             </ul>
           </figcaption>
         </figure>
@@ -250,14 +273,14 @@
     <div class="wrap">
       <div class="round-head">
         <div>
-          <div class="round-no">第二回合 · machine 的主場</div>
-          <h2 id="r2-title">單缸四行程引擎</h2>
-          <p class="sub" id="r2-sub">這次換成一台真正的機器：有金屬材質、有真實尺寸、有可以剖開的內部，還有物理可以算。這是 machine 的主場。</p>
-          <div class="round-prompt" data-prompt="round2"></div>
+          <div class="round-no"><span data-l="zh">第二回合 · machine 的主場</span><span data-l="en">Round 2 · machine's home turf</span></div>
+          <h2 id="r2-title"><span data-l="zh">單缸四行程引擎</span><span data-l="en">Single-cylinder four-stroke engine</span></h2>
+          <p class="sub" id="r2-sub"><span data-l="zh">這次換成一台真正的機器：有金屬材質、有真實尺寸、有可以剖開的內部，還有物理可以算。這是 machine 的主場。</span><span data-l="en">Now a real machine: metal, true dimensions, an inside you can cut open, and physics to compute. This is machine's home turf.</span></p>
+          <div class="round-prompt">單缸四行程引擎怎麼運作<span class="tr" data-l="en">“How does a single-cylinder four-stroke engine work?” (prompt as typed)</span></div>
         </div>
         <div class="controls">
-          <button class="btn primary" data-action="toggle" aria-pressed="false">同步播放</button>
-          <button class="btn" data-action="replay">重播</button>
+          <button class="btn primary" data-action="toggle" aria-pressed="false"><span data-l="zh">同步播放</span><span data-l="en">Play both</span></button>
+          <button class="btn" data-action="replay"><span data-l="zh">重播</span><span data-l="en">Replay</span></button>
         </div>
       </div>
 
@@ -265,16 +288,16 @@
         <figure class="anatomy">
           <div class="stage">
             <video src="media/engine-anatomy.mp4" muted loop playsinline controls preload="metadata"></video>
-            <div class="placeholder"><div class="spinner"></div>影片產生中…<small>media/engine-anatomy.mp4</small></div>
+            <div class="placeholder"><div class="spinner"></div><span data-l="zh">影片產生中…</span><span data-l="en">Video rendering…</span><small>media/engine-anatomy.mp4</small></div>
           </div>
           <figcaption>
-            <div class="label"><h3>anatomy</h3><span class="kind">等角 SVG · 剖面圖</span></div>
-            <div class="notes-title">看點</div>
+            <div class="label"><h3>anatomy</h3><span class="kind"><span data-l="zh">等角 SVG · 剖面圖</span><span data-l="en">isometric SVG · cutaway</span></span></div>
+            <div class="notes-title"><span data-l="zh">看點</span><span data-l="en">What to watch</span></div>
             <ul class="notes" id="r2-notes-anatomy">
-              <li>約 <strong>75 個零件</strong>，把引擎畫成架在工作台座上的等角 SVG <strong>剖面圖</strong>。缸徑 72 × 行程 60 mm ≈ 244 cc（machine 選的是 76 × 55 ≈ 249 cc，兩邊各自挑了合理的 250 cc 級數字）。</li>
-              <li>活塞照真實曲柄滑塊運動；凸輪以曲軸一半的轉速旋轉，凸輪輪廓由同一條升程曲線生成（進氣 BTDC 10° → ABDC 40°，排氣 BBDC 40° → ATDC 10°）。</li>
-              <li>讀數：行程（進氣／壓縮／做功／排氣）· 曲軸角度 · 轉速 · 進／排氣門升程（mm）。燃燒以填色表現，透明度跟著行程變化。</li>
-              <li>游標左右移動即可在 720° 內撥動曲軸，方向鍵每次走 15°；閒置時以 20 rpm 的示範轉速自動導覽。為了清楚有所簡化：沒有正時鏈，也沒有飛輪。</li>
+              <li><span data-l="zh">約 <strong>75 個零件</strong>，把引擎畫成架在工作台座上的等角 SVG <strong>剖面圖</strong>。缸徑 72 × 行程 60 mm ≈ 244 cc（machine 選的是 76 × 55 ≈ 249 cc，兩邊各自挑了合理的 250 cc 級數字）。</span><span data-l="en">About <strong>75 parts</strong>: the engine as an isometric SVG <strong>cutaway</strong> on a bench stand. Bore 72 × stroke 60 mm ≈ 244 cc (machine chose 76 × 55 ≈ 249 cc; each picked plausible 250 cc-class numbers).</span></li>
+              <li><span data-l="zh">活塞照真實曲柄滑塊運動；凸輪以曲軸一半的轉速旋轉，凸輪輪廓由同一條升程曲線生成（進氣 BTDC 10° → ABDC 40°，排氣 BBDC 40° → ATDC 10°）。</span><span data-l="en">The piston follows real slider-crank motion; the cams turn at half crank speed, with lobes built from the same lift curve (intake 10° BTDC → 40° ABDC, exhaust 40° BBDC → 10° ATDC).</span></li>
+              <li><span data-l="zh">讀數：行程（進氣／壓縮／做功／排氣）· 曲軸角度 · 轉速 · 進／排氣門升程（mm）。燃燒以填色表現，透明度跟著行程變化。</span><span data-l="en">Readout: stroke (intake / compression / power / exhaust) · crank angle · rpm · intake and exhaust lift in mm. Combustion is a fill whose opacity follows the stroke.</span></li>
+              <li><span data-l="zh">游標左右移動即可在 720° 內撥動曲軸，方向鍵每次走 15°；閒置時以 20 rpm 的示範轉速自動導覽。為了清楚有所簡化：沒有正時鏈，也沒有飛輪。</span><span data-l="en">Move the pointer across to scrub the crank through 720°; arrow keys step 15°. When idle it tours at a demonstration 20 rpm. Simplified for clarity: no timing chain, no flywheel.</span></li>
             </ul>
           </figcaption>
         </figure>
@@ -282,17 +305,17 @@
         <figure class="machine">
           <div class="stage">
             <video src="media/engine-machine.mp4" muted loop playsinline controls preload="metadata"></video>
-            <div class="placeholder"><div class="spinner"></div>影片產生中…<small>media/engine-machine.mp4</small></div>
+            <div class="placeholder"><div class="spinner"></div><span data-l="zh">影片產生中…</span><span data-l="en">Video rendering…</span><small>media/engine-machine.mp4</small></div>
           </div>
           <figcaption>
-            <div class="label"><h3>machine</h3><span class="kind">three.js 寫實 3D · 自錄影片</span></div>
-            <div class="notes-title">看點</div>
+            <div class="label"><h3>machine</h3><span class="kind"><span data-l="zh">three.js 寫實 3D · 自錄影片</span><span data-l="en">photoreal three.js 3D · self-recorded film</span></span></div>
+            <div class="notes-title"><span data-l="zh">看點</span><span data-l="en">What to watch</span></div>
             <ul class="notes" id="r2-notes-machine">
-              <li>架在引擎測功機上的 <strong>249 cc 風冷 DOHC 單缸</strong>（缸徑 76 mm × 行程 55 mm，壓縮比 10.7）：鑄鋁散熱片、鍍鉻件，不鏽鋼排氣管會依解算結果逐漸燒熱變色。</li>
-              <li>活塞、連桿、曲軸照真實的曲柄滑塊運動學走；氣門照真實凸輪正時開關（進氣 BTDC 10° → ABDC 40°，排氣 BBDC 40° → ATDC 10°）。</li>
-              <li>主數字是<strong>制動功率 kW</strong>，由準穩態模型算出（容積效率、FMEP 摩擦、測功機負載 cω²）：全油門 8,513 rpm 時 16.9 kW · 19.0 N·m，同級公開數據約 19.4 kW。</li>
-              <li>剖面模式附即時標籤：燃燒室壓力、活塞速度、氣門升程、轉速。</li>
-              <li>破壞模式：全油門下撤掉測功機負載，轉速衝過算出的氣門浮動轉速（11,758 rpm），氣門撞上活塞，功率歸零。自動影片依序演出：組裝 → 催油門 → 剖面 → 爆炸圖 → 弄壞它。</li>
+              <li><span data-l="zh">架在引擎測功機上的 <strong>249 cc 風冷 DOHC 單缸</strong>（缸徑 76 mm × 行程 55 mm，壓縮比 10.7）：鑄鋁散熱片、鍍鉻件，不鏽鋼排氣管會依解算結果逐漸燒熱變色。</span><span data-l="en">A <strong>249 cc air-cooled DOHC single</strong> (bore 76 mm × stroke 55 mm, compression 10.7) on an engine dyno: cast aluminium fins, chrome parts, and a stainless header that heats up as the solver says.</span></li>
+              <li><span data-l="zh">活塞、連桿、曲軸照真實的曲柄滑塊運動學走；氣門照真實凸輪正時開關（進氣 BTDC 10° → ABDC 40°，排氣 BBDC 40° → ATDC 10°）。</span><span data-l="en">Piston, rod and crank follow real slider-crank kinematics; the valves follow real cam timing (intake 10° BTDC → 40° ABDC, exhaust 40° BBDC → 10° ATDC).</span></li>
+              <li><span data-l="zh">主數字是<strong>制動功率 kW</strong>，由準穩態模型算出（容積效率、FMEP 摩擦、測功機負載 cω²）：全油門 8,513 rpm 時 16.9 kW · 19.0 N·m，同級公開數據約 19.4 kW。</span><span data-l="en">The hero number is <strong>brake power in kW</strong> from a quasi-steady model (volumetric efficiency, FMEP friction, dyno load cω²): 16.9 kW · 19.0 N·m at 8,513 rpm wide open, against about 19.4 kW published for the class.</span></li>
+              <li><span data-l="zh">剖面模式附即時標籤：燃燒室壓力、活塞速度、氣門升程、轉速。</span><span data-l="en">The cutaway carries live labels: chamber pressure, piston speed, valve lift, rpm.</span></li>
+              <li><span data-l="zh">破壞模式：全油門下撤掉測功機負載，轉速衝過算出的氣門浮動轉速（11,758 rpm），氣門撞上活塞，功率歸零。自動影片依序演出：組裝 → 催油門 → 剖面 → 爆炸圖 → 弄壞它。</span><span data-l="en">Break mode drops the dyno load at full throttle: rpm runs past the computed valve-float speed (11,758 rpm), a valve strikes the piston and power falls to zero. The auto film runs: assemble → throttle up → cutaway → exploded view → break.</span></li>
             </ul>
           </figcaption>
         </figure>
@@ -303,46 +326,46 @@
   <!-- ───────────── Table ───────────── -->
   <section class="table-sec">
     <div class="wrap">
-      <h2>一張表看差異</h2>
+      <h2><span data-l="zh">一張表看差異</span><span data-l="en">The differences in one table</span></h2>
       <table class="cmp">
         <thead>
           <tr><th></th><th class="a">anatomy</th><th class="m">machine</th></tr>
         </thead>
         <tbody>
           <tr>
-            <th>輸出格式</th>
-            <td class="a" data-col="anatomy">單檔 HTML，內含等角 SVG 圖與互動；也可輸出 React 元件</td>
-            <td class="m" data-col="machine">three.js 互動網頁，外加用自帶錄影器錄成的腳本化影片</td>
+            <th><span data-l="zh">輸出格式</span><span data-l="en">Output</span></th>
+            <td class="a" data-col="anatomy"><span data-l="zh">單檔 HTML，內含等角 SVG 圖與互動；也可輸出 React 元件</span><span data-l="en">A single HTML file with the isometric SVG and its interaction; can also output React components</span></td>
+            <td class="m" data-col="machine"><span data-l="zh">three.js 互動網頁，外加用自帶錄影器錄成的腳本化影片</span><span data-l="en">An interactive three.js page, plus a scripted film made with its own recorder</span></td>
           </tr>
           <tr>
-            <th>檔案大小／依賴</th>
-            <td class="a" data-col="anatomy">292 KB 單檔 HTML，零外部請求、純 SVG，不需 WebGL</td>
-            <td class="m" data-col="machine">112 KB 單檔 HTML（工具組已內嵌），但執行時要從 jsDelivr 載入 three.js 0.170、從 Poly Haven 載入 HDRI 環境光與 Google Fonts，需要 WebGL；錄影片另需 Playwright 與 ffmpeg</td>
+            <th><span data-l="zh">檔案大小／依賴</span><span data-l="en">Size / dependencies</span></th>
+            <td class="a" data-col="anatomy"><span data-l="zh">292 KB 單檔 HTML，零外部請求、純 SVG，不需 WebGL</span><span data-l="en">292 KB single HTML, zero external requests, pure SVG, no WebGL</span></td>
+            <td class="m" data-col="machine"><span data-l="zh">112 KB 單檔 HTML（工具組已內嵌），但執行時要從 jsDelivr 載入 three.js 0.170、從 Poly Haven 載入 HDRI 環境光與 Google Fonts，需要 WebGL；錄影片另需 Playwright 與 ffmpeg</span><span data-l="en">112 KB single HTML (kit inlined), but at runtime it loads three.js 0.170 from jsDelivr, an HDRI from Poly Haven and Google Fonts, and needs WebGL; the film also needs Playwright and ffmpeg</span></td>
           </tr>
           <tr>
-            <th>視覺風格</th>
-            <td class="a" data-col="anatomy">單色線稿加一個強調色，零件細小精準，像編輯插畫</td>
-            <td class="m" data-col="machine">寫實 PBR 金屬（黃銅、鋁、鋼）、攝影棚打光與柔和陰影</td>
+            <th><span data-l="zh">視覺風格</span><span data-l="en">Look</span></th>
+            <td class="a" data-col="anatomy"><span data-l="zh">單色線稿加一個強調色，零件細小精準，像編輯插畫</span><span data-l="en">Monochrome line art with one accent; many small precise parts, like an editorial illustration</span></td>
+            <td class="m" data-col="machine"><span data-l="zh">寫實 PBR 金屬（黃銅、鋁、鋼）、攝影棚打光與柔和陰影</span><span data-l="en">Photoreal PBR metals (brass, aluminium, steel), studio lighting and soft shadows</span></td>
           </tr>
           <tr>
-            <th>互動</th>
-            <td class="a" data-col="anatomy">平穩的緩動動畫，搭配即時讀數</td>
-            <td class="m" data-col="machine">物理數值解算、參數滑桿，爆炸圖／剖面／X 光／標籤／「弄壞它」等模式</td>
+            <th><span data-l="zh">互動</span><span data-l="en">Interaction</span></th>
+            <td class="a" data-col="anatomy"><span data-l="zh">平穩的緩動動畫，搭配即時讀數</span><span data-l="en">Calm eased motion with a live readout</span></td>
+            <td class="m" data-col="machine"><span data-l="zh">物理數值解算、參數滑桿，爆炸圖／剖面／X 光／標籤／「弄壞它」等模式</span><span data-l="en">A physics solver, parameter sliders, and explode / cutaway / x-ray / labels / break-it modes</span></td>
           </tr>
           <tr>
-            <th>最擅長</th>
-            <td class="a" data-col="anatomy">把抽象概念（演算法、系統）畫成一眼認得出的實體物件</td>
-            <td class="m" data-col="machine">真實的機械：材質、尺寸、剖面與電影感的運鏡</td>
+            <th><span data-l="zh">最擅長</span><span data-l="en">Best at</span></th>
+            <td class="a" data-col="anatomy"><span data-l="zh">把抽象概念（演算法、系統）畫成一眼認得出的實體物件</span><span data-l="en">Turning abstract ideas (algorithms, systems) into a physical object you recognise at a glance</span></td>
+            <td class="m" data-col="machine"><span data-l="zh">真實的機械：材質、尺寸、剖面與電影感的運鏡</span><span data-l="en">Real machines: materials, scale, cutaways and cinematic camera work</span></td>
           </tr>
           <tr>
-            <th>適合放在哪裡</th>
-            <td class="a" data-col="anatomy">技術文件、部落格文章、產品頁裡的說明圖</td>
-            <td class="m" data-col="machine">產品展示、教學影片、社群短片、簡報開場</td>
+            <th><span data-l="zh">適合放在哪裡</span><span data-l="en">Where it fits</span></th>
+            <td class="a" data-col="anatomy"><span data-l="zh">技術文件、部落格文章、產品頁裡的說明圖</span><span data-l="en">Figures in docs, blog posts and product pages</span></td>
+            <td class="m" data-col="machine"><span data-l="zh">產品展示、教學影片、社群短片、簡報開場</span><span data-l="en">Product showcases, teaching videos, social clips, deck openers</span></td>
           </tr>
         </tbody>
       </table>
       <p class="verdict">
-        簡單說：要在文章裡安靜地講清楚一個概念，選 anatomy；要讓人「看見」一台機器怎麼動、甚至拍成片子，選 machine。
+        <span data-l="zh">簡單說：要在文章裡安靜地講清楚一個概念，選 anatomy；要讓人「看見」一台機器怎麼動、甚至拍成片子，選 machine。</span><span data-l="en">In short: to explain a concept quietly inside an article, pick anatomy; to let people see a machine move, or cut it into a film, pick machine.</span>
       </p>
     </div>
   </section>
@@ -354,13 +377,25 @@
       <li><strong>anatomy</strong> — <a href="https://github.com/wheresryan22/anatomy" rel="noopener">github.com/wheresryan22/anatomy</a></li>
       <li><strong>machine</strong> — <a href="https://github.com/AirsupHQ/machine-skill" rel="noopener">github.com/AirsupHQ/machine-skill</a></li>
     </ul>
-    兩段影片皆由各自的 skill 從同一句提示產生，版權與功勞屬於原作者。
+    <span data-l="zh">兩段影片皆由各自的 skill 從同一句提示產生，版權與功勞屬於原作者。</span><span data-l="en">Every video was generated by its skill from the same prompt; credit and rights belong to the original authors.</span>
   </div>
 </footer>
 
 <script>
 (() => {
-  document.querySelectorAll('[data-prompt="round2"]').forEach(el => { el.textContent = ROUND2_PROMPT; });
+  const root = document.documentElement;
+  const TITLES = { zh: '同一句話，兩個 skill', en: 'One prompt, two skills: anatomy vs machine' };
+  const TOGGLE = { zh: ['同步播放', '暫停'], en: ['Play both', 'Pause'] };
+  const syncers = [];
+  function setLang(lang, save) {
+    root.dataset.lang = lang;
+    root.lang = lang === 'zh' ? 'zh-Hant-TW' : 'en';
+    document.title = TITLES[lang];
+    document.querySelectorAll('[data-set-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.setLang === lang)));
+    syncers.forEach(f => f());
+    if (save) { try { localStorage.setItem('skill-compare-lang', lang); } catch (e) {} }
+  }
+  document.querySelectorAll('[data-set-lang]').forEach(b => b.addEventListener('click', () => setLang(b.dataset.setLang, true)));
 
   const rounds = [...document.querySelectorAll('section.round')];
 
@@ -389,13 +424,14 @@
 
     function sync() {
       const on = playing();
-      toggle.textContent = on ? '暫停' : '同步播放';
+      toggle.textContent = TOGGLE[root.dataset.lang][on ? 1 : 0];
       toggle.setAttribute('aria-pressed', String(on));
     }
     function playAll() { live().forEach(v => v.play().catch(() => {})); }
     function pauseAll() { live().forEach(v => v.pause()); }
     function restart() { live().forEach(v => { v.currentTime = 0; }); playAll(); }
 
+    syncers.push(sync);
     toggle.addEventListener('click', () => {
       if (playing()) { userPaused = true; pauseAll(); }
       else { userPaused = false; restart(); }
@@ -411,6 +447,7 @@
       }, { threshold: 0.35 }).observe(sec);
     }
   });
+  setLang(root.dataset.lang, false);
 })();
 </script>
 </body>
