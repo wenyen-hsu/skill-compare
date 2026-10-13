@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>同一句話，兩個 skill</title>
+<meta name="description" content="anatomy 與 machine 兩個 Claude Code skill，用同一句提示做出的動畫圖解並排比較。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wenyen-hsu.github.io/skill-compare/">
+<meta property="og:title" content="同一句話，兩個 skill：anatomy vs machine">
+<meta property="og:description" content="同一句提示交給兩個 Claude Code skill：等角線稿的 anatomy 與寫實 three.js 的 machine。令牌桶限流器、單缸四行程引擎，影片並排看差距。">
+<meta property="og:image" content="https://wenyen-hsu.github.io/skill-compare/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="同一句話，兩個 skill：anatomy vs machine">
+<meta name="twitter:description" content="令牌桶限流器、單缸四行程引擎，兩個 Claude Code skill 的成果並排比較。">
+<meta name="twitter:image" content="https://wenyen-hsu.github.io/skill-compare/og.jpg">
+<link rel="canonical" href="https://wenyen-hsu.github.io/skill-compare/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  // Round 2 prompt（頁面上所有 data-prompt="round2" 的地方都會跟著換）
+  const ROUND2_PROMPT = '單缸四行程引擎怎麼運作';
+</script>
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --surface: #fffdf8;
+    --ink: #1c1b19;
+    --ink-2: #57534b;
+    --ink-3: #8a857a;
+    --rule: #e2ddd2;
+    --stage: #ebe8e1;
+    --accent: #b4532a;
+    --accent-ink: #fff;
+    --anatomy: #2f5d8a;
+    --machine: #8a6a2f;
+    --code-bg: #efebe2;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151413;
+      --surface: #1d1c1a;
+      --ink: #ece8df;
+      --ink-2: #b5afa3;
+      --ink-3: #847e72;
+      --rule: #2f2d29;
+      --stage: #0e0d0c;
+      --accent: #e0855a;
+      --accent-ink: #1a0f09;
+      --anatomy: #8fb6dc;
+      --machine: #d7b56f;
+      --code-bg: #26241f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151413; --surface: #1d1c1a; --ink: #ece8df; --ink-2: #b5afa3; --ink-3: #847e72;
+    --rule: #2f2d29; --stage: #0e0d0c; --accent: #e0855a; --accent-ink: #1a0f09;
+    --anatomy: #8fb6dc; --machine: #d7b56f; --code-bg: #26241f;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans TC", -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+  @media (min-width: 720px) { .wrap { padding: 0 40px; } }
+
+  h1, h2, h3 { font-family: "Noto Serif TC", "Songti TC", serif; font-weight: 700; line-height: 1.3; margin: 0; }
+  code, .prompt { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+  header.hero { padding: 72px 0 40px; }
+  .eyebrow { font-size: 13px; letter-spacing: .12em; color: var(--ink-3); text-transform: uppercase; margin-bottom: 14px; }
+  .hero h1 { font-size: clamp(34px, 6vw, 60px); letter-spacing: .01em; }
+  .hero p { max-width: 42em; color: var(--ink-2); font-size: 17px; margin: 22px 0 0; }
+  .hero .legend { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 26px; font-size: 14px; color: var(--ink-2); }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+  .dot.a { background: var(--anatomy); } .dot.m { background: var(--machine); }
+
+  section.round { border-top: 1px solid var(--rule); padding: 56px 0 64px; }
+  .round-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 32px; margin-bottom: 28px; }
+  .round-no { font-size: 13px; letter-spacing: .12em; color: var(--accent); font-weight: 700; margin-bottom: 8px; }
+  .round-head h2 { font-size: clamp(26px, 3.6vw, 38px); }
+  .round-head .sub { color: var(--ink-2); margin: 8px 0 0; max-width: 38em; }
+  .round-prompt { margin-top: 14px; display: inline-block; background: var(--code-bg); border-radius: 6px; padding: 4px 10px; font-size: 14px; color: var(--ink); overflow-wrap: anywhere; }
+
+  .controls { display: flex; gap: 10px; flex-shrink: 0; }
+  button.btn {
+    font: inherit; font-size: 14px; font-weight: 500;
+    border: 1px solid var(--rule); background: var(--surface); color: var(--ink);
+    padding: 8px 16px; border-radius: 999px; cursor: pointer; line-height: 1.4;
+  }
+  button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  button.btn:hover { filter: brightness(1.05); }
+  button.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .pair { display: flex; gap: 24px; align-items: flex-start; }
+  .pair > figure { flex: var(--w, 1.778) 1 0; min-width: 0; margin: 0; }
+  @media (max-width: 719px) {
+    .pair { flex-direction: column; gap: 40px; }
+    .pair > figure { flex: none; width: 100%; }
+  }
+
+  .stage {
+    position: relative; width: 100%;
+    aspect-ratio: var(--ar, 16 / 9);
+    background: var(--stage);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--rule);
+  }
+  .stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; background: var(--stage); }
+  .stage .placeholder {
+    position: absolute; inset: 0; display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    color: var(--ink-3); font-size: 15px; text-align: center; padding: 16px;
+    background:
+      repeating-linear-gradient(135deg, transparent 0 14px, color-mix(in srgb, var(--rule) 55%, transparent) 14px 15px),
+      var(--stage);
+  }
+  .stage .placeholder small { font-size: 12px; font-family: ui-monospace, Menlo, monospace; opacity: .8; overflow-wrap: anywhere; }
+  .stage.missing video { display: none; }
+  .stage.missing .placeholder { display: flex; }
+  .spinner { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--rule); border-top-color: var(--ink-3); animation: spin 1.1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+  figcaption { padding-top: 18px; }
+  .label { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+  .label h3 { font-size: 22px; }
+  .label .kind { font-size: 13px; color: var(--ink-3); }
+  figure.anatomy h3 { color: var(--anatomy); }
+  figure.machine h3 { color: var(--machine); }
+  .notes { margin: 12px 0 0; padding: 0; list-style: none; color: var(--ink-2); font-size: 15px; }
+  .notes li { position: relative; padding-left: 18px; margin: 6px 0; }
+  .notes li::before { content: ""; position: absolute; left: 2px; top: .78em; width: 6px; height: 1px; background: var(--ink-3); }
+  .notes-title { font-size: 12px; letter-spacing: .1em; color: var(--ink-3); margin-top: 14px; }
+
+  section.table-sec { border-top: 1px solid var(--rule); padding: 56px 0 64px; }
+  section.table-sec h2 { font-size: clamp(26px, 3.6vw, 38px); margin-bottom: 24px; }
+  table.cmp { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.cmp th, table.cmp td { text-align: left; vertical-align: top; padding: 14px 16px 14px 0; border-bottom: 1px solid var(--rule); }
+  table.cmp thead th { font-family: "Noto Serif TC", serif; font-size: 18px; border-bottom: 2px solid var(--ink); }
+  table.cmp thead th.a { color: var(--anatomy); } table.cmp thead th.m { color: var(--machine); }
+  table.cmp tbody th { font-weight: 500; color: var(--ink-3); width: 8.5em; white-space: nowrap; }
+  table.cmp td { color: var(--ink-2); }
+  @media (max-width: 719px) {
+    table.cmp thead { display: none; }
+    table.cmp, table.cmp tbody, table.cmp tr, table.cmp th, table.cmp td { display: block; width: auto; }
+    table.cmp tr { border-bottom: 1px solid var(--rule); padding: 14px 0; }
+    table.cmp tbody th { padding: 0 0 6px; border: 0; white-space: normal; }
+    table.cmp td { border: 0; padding: 4px 0 4px 64px; position: relative; }
+    table.cmp td::before { content: attr(data-col); position: absolute; left: 0; top: 4px; font-size: 13px; font-weight: 700; }
+    table.cmp td.a::before { color: var(--anatomy); } table.cmp td.m::before { color: var(--machine); }
+  }
+
+  .verdict { margin-top: 28px; color: var(--ink-2); max-width: 46em; }
+
+  footer { border-top: 1px solid var(--rule); padding: 32px 0 56px; font-size: 14px; color: var(--ink-3); }
+  footer a { color: var(--ink-2); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  footer ul { list-style: none; padding: 0; margin: 0 0 12px; }
+  footer li { margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<header class="hero wrap">
+  <div class="eyebrow">Claude Code skill 對照</div>
+  <h1>同一句話，兩個 skill</h1>
+  <p>
+    我們把<strong>一模一樣的一句提示</strong>分別交給兩個會「畫東西來解釋事情」的 Claude Code skill：
+    走手繪感等角線稿路線的 <strong>anatomy</strong>，以及走寫實 three.js 3D 模擬路線的 <strong>machine</strong>。
+    兩邊都沒有人工修圖，影片就是它們自己產出的動畫。第一回合考抽象演算法，第二回合考真正的機械，
+    看看各自在主場與客場的表現。
+  </p>
+  <div class="legend">
+    <span><span class="dot a"></span>anatomy — 等角 SVG 線稿</span>
+    <span><span class="dot m"></span>machine — 寫實 three.js 3D</span>
+  </div>
+</header>
+
+<main>
+  <!-- ───────────── Round 1 ───────────── -->
+  <section class="round" id="round1" data-round="1">
+    <div class="wrap">
+      <div class="round-head">
+        <div>
+          <div class="round-no">第一回合 · anatomy 的主場</div>
+          <h2>令牌桶限流器</h2>
+          <p class="sub">這是一個抽象演算法，沒有實體外觀可以參考。誰能把它變成一台「看得懂」的機器？</p>
+          <div class="round-prompt">解釋 token bucket rate limiter 怎麼運作</div>
+        </div>
+        <div class="controls">
+          <button class="btn primary" data-action="toggle" aria-pressed="false">同步播放</button>
+          <button class="btn" data-action="replay">重播</button>
+        </div>
+      </div>
+
+      <div class="pair">
+        <figure class="anatomy" style="--w: 1.19">
+          <div class="stage" style="--ar: 858 / 720">
+            <video src="media/token-bucket-anatomy.mp4" muted loop playsinline controls preload="metadata"></video>
+            <div class="placeholder"><div class="spinner"></div>影片產生中…<small>media/token-bucket-anatomy.mp4</small></div>
+          </div>
+          <figcaption>
+            <div class="label"><h3>anatomy</h3><span class="kind">等角 SVG · 292 KB 單檔 HTML</span></div>
+            <div class="notes-title">看點</div>
+            <ul class="notes">
+              <li>把令牌桶做成一台<strong>投幣式發幣機</strong>：進料輪每秒補 1 枚令牌，彈匣最多裝 8 枚。</li>
+              <li>每來一個請求，滑塊就推出一枚令牌放行；彈匣空了，<strong>拒絕旗</strong>立刻升起。</li>
+              <li>彈匣滿了還在補？多出來的令牌掉進旁邊的<strong>溢出接盤</strong>，「容量上限」一眼就懂。</li>
+              <li>角落的即時讀數「x / 8 令牌 · 通過 · 拒絕」跟著動畫同步跳動。</li>
+            </ul>
+          </figcaption>
+        </figure>
+
+        <figure class="machine" style="--w: 1.778">
+          <div class="stage" style="--ar: 16 / 9">
+            <video src="media/token-bucket-machine.mp4" muted loop playsinline controls preload="metadata"></video>
+            <div class="placeholder"><div class="spinner"></div>影片產生中…<small>media/token-bucket-machine.mp4</small></div>
+          </div>
+          <figcaption>
+            <div class="label"><h3>machine</h3><span class="kind">three.js 寫實 3D · 自錄 28 秒影片</span></div>
+            <div class="notes-title">看點</div>
+            <ul class="notes">
+              <li>同一台發幣機，用黃銅與鋁的 PBR 材質重建，真實尺寸約 34 cm，像擺在桌上的實物。</li>
+              <li>主數字直接顯示「桶裡還有幾枚令牌」，旁邊有請求速率滑桿可以調。</li>
+              <li>「Flood it」破壞模式：每秒灌 40 個請求，畫面上仍然每秒只放行 1 個。</li>
+              <li>自動影片依序演出：組裝 → 運轉 → 剖面 → 爆炸圖 → 灌爆。</li>
+            </ul>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── Round 2 ───────────── -->
+  <section class="round" id="round2" data-round="2">
+    <div class="wrap">
+      <div class="round-head">
+        <div>
+          <div class="round-no">第二回合 · machine 的主場</div>
+          <h2 id="r2-title">單缸四行程引擎</h2>
+          <p class="sub" id="r2-sub">這次換成一台真正的機器：有金屬材質、有真實尺寸、有可以剖開的內部，還有物理可以算。這是 machine 的主場。</p>
+          <div class="round-prompt" data-prompt="round2"></div>
+        </div>
+        <div class="controls">
+          <button class="btn primary" data-action="toggle" aria-pressed="false">同步播放</button>
+          <button class="btn" data-action="replay">重播</button>
+        </div>
+      </div>
+
+      <div class="pair">
+        <figure class="anatomy">
+          <div class="stage">
+            <video src="media/engine-anatomy.mp4" muted loop playsinline controls preload="metadata"></video>
+            <div class="placeholder"><div class="spinner"></div>影片產生中…<small>media/engine-anatomy.mp4</small></div>
+          </div>
+          <figcaption>
+            <div class="label"><h3>anatomy</h3><span class="kind">等角 SVG · 剖面圖</span></div>
+            <div class="notes-title">看點</div>
+            <ul class="notes" id="r2-notes-anatomy">
+              <li>約 <strong>75 個零件</strong>，把引擎畫成架在工作台座上的等角 SVG <strong>剖面圖</strong>。缸徑 72 × 行程 60 mm ≈ 244 cc（machine 選的是 76 × 55 ≈ 249 cc，兩邊各自挑了合理的 250 cc 級數字）。</li>
+              <li>活塞照真實曲柄滑塊運動；凸輪以曲軸一半的轉速旋轉，凸輪輪廓由同一條升程曲線生成（進氣 BTDC 10° → ABDC 40°，排氣 BBDC 40° → ATDC 10°）。</li>
+              <li>讀數：行程（進氣／壓縮／做功／排氣）· 曲軸角度 · 轉速 · 進／排氣門升程（mm）。燃燒以填色表現，透明度跟著行程變化。</li>
+              <li>游標左右移動即可在 720° 內撥動曲軸，方向鍵每次走 15°；閒置時以 20 rpm 的示範轉速自動導覽。為了清楚有所簡化：沒有正時鏈，也沒有飛輪。</li>
+            </ul>
+          </figcaption>
+        </figure>
+
+        <figure class="machine">
+          <div class="stage">
+            <video src="media/engine-machine.mp4" muted loop playsinline controls preload="metadata"></video>
+            <div class="placeholder"><div class="spinner"></div>影片產生中…<small>media/engine-machine.mp4</small></div>
+          </div>
+          <figcaption>
+            <div class="label"><h3>machine</h3><span class="kind">three.js 寫實 3D · 自錄影片</span></div>
+            <div class="notes-title">看點</div>
+            <ul class="notes" id="r2-notes-machine">
+              <li>架在引擎測功機上的 <strong>249 cc 風冷 DOHC 單缸</strong>（缸徑 76 mm × 行程 55 mm，壓縮比 10.7）：鑄鋁散熱片、鍍鉻件，不鏽鋼排氣管會依解算結果逐漸燒熱變色。</li>
+              <li>活塞、連桿、曲軸照真實的曲柄滑塊運動學走；氣門照真實凸輪正時開關（進氣 BTDC 10° → ABDC 40°，排氣 BBDC 40° → ATDC 10°）。</li>
+              <li>主數字是<strong>制動功率 kW</strong>，由準穩態模型算出（容積效率、FMEP 摩擦、測功機負載 cω²）：全油門 8,513 rpm 時 16.9 kW · 19.0 N·m，同級公開數據約 19.4 kW。</li>
+              <li>剖面模式附即時標籤：燃燒室壓力、活塞速度、氣門升程、轉速。</li>
+              <li>破壞模式：全油門下撤掉測功機負載，轉速衝過算出的氣門浮動轉速（11,758 rpm），氣門撞上活塞，功率歸零。自動影片依序演出：組裝 → 催油門 → 剖面 → 爆炸圖 → 弄壞它。</li>
+            </ul>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── Table ───────────── -->
+  <section class="table-sec">
+    <div class="wrap">
+      <h2>一張表看差異</h2>
+      <table class="cmp">
+        <thead>
+          <tr><th></th><th class="a">anatomy</th><th class="m">machine</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>輸出格式</th>
+            <td class="a" data-col="anatomy">單檔 HTML，內含等角 SVG 圖與互動；也可輸出 React 元件</td>
+            <td class="m" data-col="machine">three.js 互動網頁，外加用自帶錄影器錄成的腳本化影片</td>
+          </tr>
+          <tr>
+            <th>檔案大小／依賴</th>
+            <td class="a" data-col="anatomy">292 KB 單檔 HTML，零外部請求、純 SVG，不需 WebGL</td>
+            <td class="m" data-col="machine">112 KB 單檔 HTML（工具組已內嵌），但執行時要從 jsDelivr 載入 three.js 0.170、從 Poly Haven 載入 HDRI 環境光與 Google Fonts，需要 WebGL；錄影片另需 Playwright 與 ffmpeg</td>
+          </tr>
+          <tr>
+            <th>視覺風格</th>
+            <td class="a" data-col="anatomy">單色線稿加一個強調色，零件細小精準，像編輯插畫</td>
+            <td class="m" data-col="machine">寫實 PBR 金屬（黃銅、鋁、鋼）、攝影棚打光與柔和陰影</td>
+          </tr>
+          <tr>
+            <th>互動</th>
+            <td class="a" data-col="anatomy">平穩的緩動動畫，搭配即時讀數</td>
+            <td class="m" data-col="machine">物理數值解算、參數滑桿，爆炸圖／剖面／X 光／標籤／「弄壞它」等模式</td>
+          </tr>
+          <tr>
+            <th>最擅長</th>
+            <td class="a" data-col="anatomy">把抽象概念（演算法、系統）畫成一眼認得出的實體物件</td>
+            <td class="m" data-col="machine">真實的機械：材質、尺寸、剖面與電影感的運鏡</td>
+          </tr>
+          <tr>
+            <th>適合放在哪裡</th>
+            <td class="a" data-col="anatomy">技術文件、部落格文章、產品頁裡的說明圖</td>
+            <td class="m" data-col="machine">產品展示、教學影片、社群短片、簡報開場</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="verdict">
+        簡單說：要在文章裡安靜地講清楚一個概念，選 anatomy；要讓人「看見」一台機器怎麼動、甚至拍成片子，選 machine。
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <ul>
+      <li><strong>anatomy</strong> — <a href="https://github.com/wheresryan22/anatomy" rel="noopener">github.com/wheresryan22/anatomy</a></li>
+      <li><strong>machine</strong> — <a href="https://github.com/AirsupHQ/machine-skill" rel="noopener">github.com/AirsupHQ/machine-skill</a></li>
+    </ul>
+    兩段影片皆由各自的 skill 從同一句提示產生，版權與功勞屬於原作者。
+  </div>
+</footer>
+
+<script>
+(() => {
+  document.querySelectorAll('[data-prompt="round2"]').forEach(el => { el.textContent = ROUND2_PROMPT; });
+
+  const rounds = [...document.querySelectorAll('section.round')];
+
+  rounds.forEach(sec => {
+    const videos = [...sec.querySelectorAll('video')];
+    const toggle = sec.querySelector('[data-action="toggle"]');
+    const replay = sec.querySelector('[data-action="replay"]');
+    let userPaused = false;
+
+    videos.forEach(v => {
+      const stage = v.closest('.stage');
+      const fig = v.closest('figure');
+      v.addEventListener('error', () => stage.classList.add('missing'));
+      // Match the stage and column weight to the real aspect so the pair sits at equal height.
+      v.addEventListener('loadedmetadata', () => {
+        if (!v.videoWidth || !v.videoHeight) return;
+        stage.style.setProperty('--ar', `${v.videoWidth} / ${v.videoHeight}`);
+        fig.style.setProperty('--w', (v.videoWidth / v.videoHeight).toFixed(3));
+      });
+      v.addEventListener('play', sync);
+      v.addEventListener('pause', sync);
+    });
+
+    const live = () => videos.filter(v => !v.closest('.stage').classList.contains('missing'));
+    const playing = () => live().some(v => !v.paused);
+
+    function sync() {
+      const on = playing();
+      toggle.textContent = on ? '暫停' : '同步播放';
+      toggle.setAttribute('aria-pressed', String(on));
+    }
+    function playAll() { live().forEach(v => v.play().catch(() => {})); }
+    function pauseAll() { live().forEach(v => v.pause()); }
+    function restart() { live().forEach(v => { v.currentTime = 0; }); playAll(); }
+
+    toggle.addEventListener('click', () => {
+      if (playing()) { userPaused = true; pauseAll(); }
+      else { userPaused = false; restart(); }
+    });
+    replay.addEventListener('click', () => { userPaused = false; restart(); });
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) { if (!userPaused) playAll(); }
+          else pauseAll();
+        });
+      }, { threshold: 0.35 }).observe(sec);
+    }
+  });
+})();
+</script>
+</body>
+</html>
